@@ -4,44 +4,22 @@ import numpy as np
 from serial.tools import list_ports
 
 # Define the stepper motor parameters
-step1 = 2
-dir1 = 5
-multiplier1 = 1
-step2 = 3
-dir2 = 6
-multiplier2 = 0
-totalFrequency = 2000
-timePerStep = 3  # seconds
+step1 = 3
+dir1 = 6
+multiplier1 = 1.4
+step2 = 2
+dir2 = 5
+multiplier2 = 1
+# totalFrequency = np.ones(100) * 100  # Different frequencies to test
+totalFrequency = [2]
+timePerStep = 100  # seconds
 timeMultiplier = 0
-direction = 0
+direction = 1
 
 # Flow ratio for each step, in percentage
 # flow_ratio_intro= [50, 50]
 # flow_ratio_body = [75, 99, 75, 50, 25, 1, 25, 50]
 # flow_ratios= flow_ratio_intro + flow_ratio_body + flow_ratio_body
-
-# Create a stepped sine wave for the flow ratios
-flow_ratio_intro = np.ones(50) * 50
-flow_ratio_rise = np.linspace(50, 100, 5)
-flow_ratio_fallback = np.linspace(100, 50, 5)
-flow_ratio_fall = np.linspace(50, 0, 5)
-flow_ratio_riseback = np.linspace(0, 50, 5)
-
-flow_ratios = np.concatenate(
-    [
-        flow_ratio_intro,
-        flow_ratio_rise,
-        flow_ratio_fallback,
-        flow_ratio_fall,
-        flow_ratio_riseback,
-        flow_ratio_intro,
-        flow_ratio_rise,
-        flow_ratio_fallback,
-        flow_ratio_fall,
-        flow_ratio_riseback,
-        flow_ratio_intro,
-    ]
-)
 
 
 def send_command(command):
@@ -61,10 +39,10 @@ def find_arduino_port():
     raise Exception("Arduino not found. Please check the connection.")
 
 
-def formatStepCommand(ratio):
-    ratio = ratio / 100
-    command1 = f"S{step1},{dir1},{int(totalFrequency * ratio*multiplier1)},{timePerStep*1000*timeMultiplier},{direction}\n"
-    command2 = f"S{step2},{dir2},{int(totalFrequency * (1-ratio)*multiplier2)},{timePerStep*1000*timeMultiplier},{direction}\n"
+def formatStepCommand(frequency):
+    ratio = 0.5
+    command1 = f"S{step1},{dir1},{int(frequency * ratio*multiplier1)},{timePerStep*1000*timeMultiplier},{direction}\n"
+    command2 = f"S{step2},{dir2},{int(frequency * (1-ratio)*multiplier2)},{timePerStep*1000*timeMultiplier},{direction}\n"
     return command1 + command2
 
 
@@ -79,11 +57,13 @@ try:
 
     if ser.is_open:
         time.sleep(2)
+        for frequency in totalFrequency:
+            command = formatStepCommand(frequency)
+            send_command(command)
+            time.sleep(
+                timePerStep
+            )  # Wait for 5 seconds before sending the next command
 
-        for flow in flow_ratios:
-            command = formatStepCommand(flow)
-     ~       send_command(command)
-            time.sleep(timePerStep)
 
 finally:
     if ser is not None and ser.is_open:

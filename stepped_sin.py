@@ -9,11 +9,12 @@ dir1 = 5
 multiplier1 = 1
 step2 = 3
 dir2 = 6
-multiplier2 = 0
-totalFrequency = 2000
-timePerStep = 3  # seconds
-timeMultiplier = 0
-direction = 0
+multiplier2 = 1
+totalFrequency = 50
+timePerStep = .2  # seconds
+timeMultiplier = 1
+# direction = 1 for forward, 0 for backward
+direction = 1
 
 # Flow ratio for each step, in percentage
 # flow_ratio_intro= [50, 50]
@@ -21,11 +22,18 @@ direction = 0
 # flow_ratios= flow_ratio_intro + flow_ratio_body + flow_ratio_body
 
 # Create a stepped sine wave for the flow ratios
-flow_ratio_intro = np.ones(50) * 50
-flow_ratio_rise = np.linspace(50, 100, 5)
-flow_ratio_fallback = np.linspace(100, 50, 5)
-flow_ratio_fall = np.linspace(50, 0, 5)
-flow_ratio_riseback = np.linspace(0, 50, 5)
+# flow_ratio_intro = np.ones(2) * 50
+# flow_ratio_rise = np.linspace(50, 100, 5)
+# flow_ratio_fallback = np.linspace(100, 50, 5)
+# flow_ratio_fall = np.linspace(50, 0, 5)
+# flow_ratio_riseback = np.linspace(0, 50, 5)
+
+# Full, smooth sine wave for the flow ratios
+flow_ratio_intro = np.ones(10) * 50
+flow_ratio_rise = np.linspace(50, 100, 50)
+flow_ratio_fallback = np.linspace(100, 50, 50)
+flow_ratio_fall = np.linspace(50, 0, 50)
+flow_ratio_riseback = np.linspace(0, 50, 50)
 
 flow_ratios = np.concatenate(
     [
@@ -82,7 +90,7 @@ try:
 
         for flow in flow_ratios:
             command = formatStepCommand(flow)
-     ~       send_command(command)
+            send_command(command)
             time.sleep(timePerStep)
 
 finally:
